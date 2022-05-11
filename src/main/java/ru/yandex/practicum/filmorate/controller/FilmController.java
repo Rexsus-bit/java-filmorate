@@ -11,9 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/films")
 public class FilmController {
     final int MAX_LENGTH = 200;
-    final LocalDate EARLIEST_DATE  = LocalDate.of(1985, 12, 28);
+    final LocalDate EARLIEST_DATE  = LocalDate.of(1895, 12, 28);
 
     private final Map<String, Film> films = new HashMap<>();
 
@@ -23,28 +24,27 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film create(@RequestBody Film film) throws ValidationException.ValidationException {
+    public Film create(@RequestBody Film film) throws ValidationException {
         if(film.getName() == null || film.getName().isBlank()) {
-            throw new ValidationException.ValidationException("Название фильма не может быть пустым.");
+            throw new ValidationException("Название фильма не может быть пустым.");
         }
-        if(film.getDescription().length() > MAX_LENGTH) {
-            throw new ValidationException.ValidationException("Превышена максимальная длинна описания фильма.");
+        if(film.getDescription().length() > MAX_LENGTH || film.getDescription().isBlank()) {
+            throw new ValidationException("Превышена максимальная длинна описания фильма.");
         }
         if(film.getReleaseDate().isBefore(EARLIEST_DATE)) {
-            throw new ValidationException.ValidationException("Дата не может быть раньше чем 28 декабря 1895 года.");
+            throw new ValidationException("Дата не может быть раньше чем 28 декабря 1895 года.");
         }
-        if(film.getDuration().toNanos() > 0) {
-            throw new ValidationException.ValidationException("У фильма должна быть положительная продолжительность.");
+        if(film.getDuration().toNanos() <= 0) {
+            throw new ValidationException(film.getDuration() + "У фильма должна быть положительная продолжительность.");
         }
-
         films.put(film.getName(), film);
         return film;
     }
 
     @PutMapping
-    public Film put(@RequestBody Film film) throws ValidationException.ValidationException {
+    public Film put(@RequestBody Film film) throws ValidationException {
         if(film.getName() == null || film.getName().isBlank()) {
-            throw new ValidationException.ValidationException("Название фильма не может быть пустым.");
+            throw new ValidationException("Название фильма не может быть пустым.");
         }
         films.put(film.getName(), film);
 
