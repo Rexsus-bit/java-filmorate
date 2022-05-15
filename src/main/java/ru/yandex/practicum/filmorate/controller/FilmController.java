@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,19 +13,31 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
 
-    final int MAX_LENGTH = 200;
-    final LocalDate EARLIEST_DATE  = LocalDate.of(1895, 12, 28);
+    private final int MAX_LENGTH = 200;
+    private final LocalDate EARLIEST_DATE  = LocalDate.of(1895, 12, 28);
 
     private final Map<String, Film> films = new HashMap<>();
 
     @GetMapping
-    public Collection<Film> findAll() {
-
-        return films.values();
+    public ArrayList<Film> findAll() {
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping
-    public Film create(@RequestBody Film film) throws ValidationException {
+    public Film create(@RequestBody Film film) {
+        validate(film);
+        films.put(film.getName(), film);
+        return film;
+    }
+
+    @PutMapping
+    public Film put(@RequestBody Film film) {
+        validate(film);
+        films.put(film.getName(), film);
+        return film;
+    }
+
+    private void validate(Film film){
         if(film.getName() == null || film.getName().isBlank()) {
             throw new ValidationException("Название фильма не может быть пустым.");
         }
@@ -38,16 +50,7 @@ public class FilmController {
         if(film.getDuration().toNanos() <= 0) {
             throw new ValidationException("У фильма должна быть положительная продолжительность.");
         }
-        films.put(film.getName(), film);
-        return film;
+
     }
 
-    @PutMapping
-    public Film put(@RequestBody Film film) throws ValidationException {
-        if(film.getName() == null || film.getName().isBlank()) {
-            throw new ValidationException("Название фильма не может быть пустым.");
-        }
-        films.put(film.getName(), film);
-        return film;
-    }
 }
