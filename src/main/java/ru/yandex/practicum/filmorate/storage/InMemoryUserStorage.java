@@ -17,26 +17,23 @@ public class InMemoryUserStorage implements UserStorage{
 
     private final Map<Long, User> users = new HashMap<>();
 
-    @GetMapping
+
     public ArrayList<User> findAll() {
         return new ArrayList<User>(users.values());
     }
 
-    @PostMapping
-    public User create(@RequestBody User user) {
+    public User create(User user) {
         validate(user);
         users.put(user.getId(), user);
         return user;
     }
 
-    @PutMapping
-    public User put(@RequestBody User user) {
+    public User put(User user) {
         validate(user);
         users.put(user.getId(), user);
         return user;
     }
 
-    @Override
     public Map<Long, User> getUsers() {
         return users;
     }

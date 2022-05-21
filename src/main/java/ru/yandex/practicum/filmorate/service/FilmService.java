@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 @Service
 public class FilmService {
 
+
     FilmStorage filmStorage;
 
     @Autowired
@@ -15,7 +16,12 @@ public class FilmService {
         this.filmStorage = filmStorage;
     }
 
+    void toLikeFilm(Long userId, Long filmId){
 
+
+
+
+    }
 
 
 }
