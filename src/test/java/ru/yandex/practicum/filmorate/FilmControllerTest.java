@@ -30,7 +30,7 @@ public class FilmControllerTest {
 
     @Test
     void test1_createValidUserResponseShouldBeOk() throws Exception {
-        film = Film.builder().id(1).name("Deep miles").description("Very intresting film!").releaseDate(LocalDate.of(2000,1,1)).duration(Duration.ofHours(1)).build();
+        film = Film.builder().id(1).name("Deep miles").description("Very intresting film!").releaseDate(LocalDate.of(2000,1,1)).duration(60).build();
         String body = mapper.writeValueAsString(film);
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -39,7 +39,7 @@ public class FilmControllerTest {
 
     @Test
     void test2_nameShouldNotBeEmpty() throws Exception {
-        film = Film.builder().id(1).name("").description("Very intresting film!").releaseDate(LocalDate.of(2000,1,1)).duration(Duration.ofHours(1)).build();
+        film = Film.builder().id(1).name("").description("Very intresting film!").releaseDate(LocalDate.of(2000,1,1)).duration(60).build();
         String body = mapper.writeValueAsString(film);
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -52,7 +52,7 @@ public class FilmControllerTest {
                         "Very intresting film!Very intresting film!Very intresting film!Very intresting film!" +
                         "Very intresting film!Very intresting film!Very intresting film!Very intresting film!Very " +
                         "intresting film!Very intresting film!Very intresting film!")
-                .releaseDate(LocalDate.of(2000,1,1)).duration(Duration.ofHours(1)).build();
+                .releaseDate(LocalDate.of(2000,1,1)).duration(60).build();
         String body = mapper.writeValueAsString(film);
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -60,7 +60,7 @@ public class FilmControllerTest {
 
     @Test
     void test4_shouldNotBeEarlierTheEarliestDate() throws Exception {
-        film = Film.builder().id(1).name("Deep miles").description("Very intresting film!").releaseDate(LocalDate.of(1000,1,1)).duration(Duration.ofHours(1)).build();
+        film = Film.builder().id(1).name("Deep miles").description("Very intresting film!").releaseDate(LocalDate.of(1000,1,1)).duration(60).build();
         String body = mapper.writeValueAsString(film);
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -68,7 +68,7 @@ public class FilmControllerTest {
 
     @Test
     void test5_durationShouldBePositive() throws Exception {
-        film = Film.builder().id(1).name("Deep miles").description("Very intresting film!").releaseDate(LocalDate.of(-1000,1,1)).duration(Duration.ofHours(1)).build();
+        film = Film.builder().id(1).name("Deep miles").description("Very intresting film!").releaseDate(LocalDate.of(-1000,1,1)).duration(60).build();
         String body = mapper.writeValueAsString(film);
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());

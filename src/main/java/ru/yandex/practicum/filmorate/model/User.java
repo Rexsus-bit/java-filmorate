@@ -12,9 +12,9 @@ import java.util.Set;
 public class User {
 
     private long id;
-    private String email;
     private String login;
     private String name;
+    private String email;
     private LocalDate birthday;
     private Set<Long> friendsId;
 
