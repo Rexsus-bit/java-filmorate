@@ -21,15 +21,16 @@ FROM films;
 - **Получение всех пользователей:**
 ```
 SELECT *
-FROM films;
+FROM users;
 ```
 
 - **Запрос топ 10 фильмов:**
 ```
-SELECT f.film_id, COUNT (u.user_id) AS rate
-FORM user_likes AS u
+SELECT f.film_id, 
+COUNT (u.user_id) AS rate
+FROM user_likes AS u
 LEFT OUTER JOIN films AS f ON u.film_id = f.film_id
 GROUP BY f.film_id
-SORT BY rate DESC
-limit 10;
+ORDER BY rate DESC
+LIMIT 10;
 ```
