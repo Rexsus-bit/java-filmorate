@@ -4,10 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -15,6 +18,9 @@ public class UserController {
 
     @Autowired
     private InMemoryUserStorage inMemoryUserStorage;
+
+    @Autowired
+private UserDbStorage filmDbStorage;
 
     @Autowired
     private UserService userService;
@@ -25,8 +31,9 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User getUser(@PathVariable long userId) {
-        return inMemoryUserStorage.getUser(userId);
+    public User getUser(@PathVariable int userId) {
+//        return inMemoryUserStorage.getUser(userId);
+        return filmDbStorage.findUserById(userId).orElse(null);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -60,5 +67,11 @@ public class UserController {
         userService.validateUser(user);
         return inMemoryUserStorage.put(user);
     }
+
+//    @GetMapping("/s")
+//    public User getUserByid(){
+//        System.out.println("s");
+//        return filmDbStorage.findUserById(1).get();
+//    }
 
 }
