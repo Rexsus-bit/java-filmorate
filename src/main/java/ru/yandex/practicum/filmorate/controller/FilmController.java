@@ -1,44 +1,46 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.ArrayList;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/films")
 public class FilmController {
 
-    @Autowired
-    private InMemoryFilmStorage inMemoryFilmStorage;
 
-    @Autowired
+    private FilmStorage filmStorage;
     private FilmService filmService;
 
+    public FilmController(FilmStorage filmStorage, FilmService filmService) {
+        this.filmStorage = filmStorage;
+        this.filmService = filmService;
+    }
+
     @GetMapping
-    public ArrayList<Film> findAll() {
-        return inMemoryFilmStorage.findAll();
+    public List<Film> findAll() {
+        return filmStorage.findAll();
     }
 
     @GetMapping("/{filmId}")
-    public Film getUser(@PathVariable long filmId) {
-        return inMemoryFilmStorage.getFilm(filmId);
+    public Film getFilm(@PathVariable long filmId) {
+        return filmStorage.getFilm(filmId);
     }
 
     @PostMapping
     public Film create(@RequestBody Film film) {
         filmService.validateFilm(film);
-        return inMemoryFilmStorage.create(film);
+        return filmStorage.create(film);
     }
 
     @PutMapping
     public Film put(@RequestBody Film film) {
         filmService.validateFilm(film);
-        return inMemoryFilmStorage.put(film);
+        return filmStorage.put(film);
     }
 
     @PutMapping("/{id}/like/{userId}")
