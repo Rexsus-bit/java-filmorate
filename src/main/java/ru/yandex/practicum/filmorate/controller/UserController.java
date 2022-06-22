@@ -1,16 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -18,22 +16,20 @@ public class UserController {
 
     @Autowired
     private InMemoryUserStorage inMemoryUserStorage;
-
     @Autowired
-private UserDbStorage filmDbStorage;
+    private UserStorage userStorage;
 
     @Autowired
     private UserService userService;
 
     @GetMapping
-    public ArrayList<User> findAll() {
-        return inMemoryUserStorage.findAll();
+    public List<User> findAll() {
+        return userStorage.findAll();
     }
 
     @GetMapping("/{userId}")
     public User getUser(@PathVariable int userId) {
-//        return inMemoryUserStorage.getUser(userId);
-        return filmDbStorage.findUserById(userId).orElse(null);
+        return userStorage.getUser(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -59,19 +55,14 @@ private UserDbStorage filmDbStorage;
     @PostMapping
     public User create(@RequestBody User user) {
         userService.validateUser(user);
-        return inMemoryUserStorage.create(user);
+        return userStorage.create(user);
     }
 
     @PutMapping
     public User put(@RequestBody User user) {
         userService.validateUser(user);
-        return inMemoryUserStorage.put(user);
+        return userStorage.put(user);
     }
 
-//    @GetMapping("/s")
-//    public User getUserByid(){
-//        System.out.println("s");
-//        return filmDbStorage.findUserById(1).get();
-//    }
 
 }

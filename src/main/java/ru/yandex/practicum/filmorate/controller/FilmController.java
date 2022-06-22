@@ -20,7 +20,7 @@ public class FilmController {
     private FilmService filmService;
 
     @GetMapping
-    public ArrayList<Film> findAll() {
+    public List<Film> findAll() {
         return inMemoryFilmStorage.findAll();
     }
 

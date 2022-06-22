@@ -41,6 +41,7 @@ public class InMemoryUserStorage implements UserStorage {
         return users;
     }
 
+    @Override
     public User getUser(long userId) {
         if (!users.containsKey(userId)) throw new NotFoundException("Пользователь с таким ID не найден");
         return getUsers().get(userId);
