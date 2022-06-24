@@ -1,10 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-public enum FilmGenre {
-    Comedy,
-    Drama,
-    Cartoon,
-    Thriller,
-    Documentary,
-    Action_movie
+public class FilmGenre {
+    int id;
+
 }

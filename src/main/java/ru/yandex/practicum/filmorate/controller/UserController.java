@@ -15,8 +15,6 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private InMemoryUserStorage inMemoryUserStorage;
-    @Autowired
     private UserStorage userStorage;
 
     @Autowired

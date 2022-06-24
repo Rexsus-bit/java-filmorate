@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.util.ArrayList;
@@ -15,6 +17,9 @@ public class FilmController {
 
     @Autowired
     private InMemoryFilmStorage inMemoryFilmStorage;
+
+    @Autowired
+    private FilmDbStorage filmStorage;
 
     @Autowired
     private FilmService filmService;
@@ -32,7 +37,7 @@ public class FilmController {
     @PostMapping
     public Film create(@RequestBody Film film) {
         filmService.validateFilm(film);
-        return inMemoryFilmStorage.create(film);
+        return filmStorage.create(film);
     }
 
     @PutMapping
