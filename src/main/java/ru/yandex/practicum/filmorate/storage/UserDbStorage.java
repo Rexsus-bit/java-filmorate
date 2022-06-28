@@ -17,11 +17,11 @@ import ru.yandex.practicum.filmorate.model.User;
 @Slf4j
 @Component("UserDbStorage")
 @Primary
-public class UserDbStorage implements UserStorage{
+public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDbStorage (JdbcTemplate jdbcTemplate){
+    public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -33,13 +33,13 @@ public class UserDbStorage implements UserStorage{
 
     @Override
     public User getUser(long userId) {
-        if (!doesUserExist(userId)){
+        if (!doesUserExist(userId)) {
             throw new NotFoundException("Пользователь с таким ID не найден");
         }
         // выполняем запрос к базе данных.
-        SqlRowSet rs = jdbcTemplate.queryForRowSet("SELECT * FROM USERS WHERE USER_ID = ?", userId);
+        SqlRowSet rs = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE user_id = ?", userId);
         // обрабатываем результат выполнения запроса
-        if(rs.next()) {
+        if (rs.next()) {
             User user = new User(rs.getInt("user_id"), rs.getString("user_login"),
                     rs.getString("user_name"), rs.getString("user_email"),
                     java.sql.Date.valueOf(rs.getString("user_birthday")).toLocalDate(),
@@ -51,9 +51,10 @@ public class UserDbStorage implements UserStorage{
             return null;
         }
     }
+
     @Override
     public List<User> findAll() {
-        String sql = "SELECT * FROM USERS"; // TODO COMPARE TWO CONSTRUCTIONS
+        String sql = "SELECT * FROM USERS";
         return jdbcTemplate.query(sql, this::mapRowToUser);
     }
 
@@ -61,57 +62,44 @@ public class UserDbStorage implements UserStorage{
         return new User(rs.getInt("user_id"), rs.getString("user_login"),
                 rs.getString("user_name"), rs.getString("user_email"),
                 java.sql.Date.valueOf(rs.getString("user_birthday")).toLocalDate(),
-            findUserFriends(rs.getLong("user_id")));
+                findUserFriends(rs.getLong("user_id")));
     }
 
     public Set<Long> findUserFriends(long userId) {    // TODO COMPARE TWO CONSTRUCTIONS
-        String sql = "SELECT FR.SECOND_USER_ID FROM USERS S LEFT OUTER JOIN FRIENDSHIP_RELATIONS FR ON S.USER_ID = FR.FIRST_USER_ID WHERE USER_ID = " + userId;
+        String sql = "SELECT fr.second_user_id FROM users s LEFT OUTER JOIN friendship_relations fr ON s.user_id = fr.first_user_id WHERE user_id = " + userId;
         ArrayList<Long> usersList = (ArrayList<Long>) jdbcTemplate.query(sql, (rs, rowNum) ->
-                 (rs.getLong("SECOND_USER_ID")));
+                (rs.getLong("second_user_id")));
         return new HashSet<Long>(usersList);
     }
 
     @Override
     public User create(User user) {
         user.setId(userIdCounter());
-        String sqlQuery = "insert into USERS(USER_ID, USER_LOGIN, USER_NAME, USER_EMAIL, USER_BIRTHDAY) values (?, ?, ?, ?, ?)";
-            jdbcTemplate.update(sqlQuery,
-                    user.getId(),
-                    user.getLogin(),
-                    user.getName(),
-                   user.getEmail(),
-                   user.getBirthday());
-//            saveFriends(user); // TODO а нужно ли добавлять друзей при создании? наверное нет, тут ведь еще только создается профиль
+        if (user.getFriendsId() == null) user.setFriendsId(new HashSet<>());
+        String sqlQuery = "INSERT INTO users(user_id, user_login, user_name, user_email, user_birthday) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sqlQuery,
+                user.getId(),
+                user.getLogin(),
+                user.getName(),
+                user.getEmail(),
+                user.getBirthday());
         return user;
     }
-//    private void saveFriends(User user){
-//        for (Long friendId : user.getFriendsId()) {
-//            String sqlQuery = "insert into FRIENDSHIP_RELATIONS (FIRST_USER_ID, SECOND_USER_ID, FRIENDSHIP_STATUS_ID) values (?, ?, ?)";
-//
-//            jdbcTemplate.update(sqlQuery,
-//                    user.getId(),
-//                    friendId,
-//                    isFriendshipConfirmed(user.getId(), friendId));
-//        }
-//    }
 
     private boolean isFriendshipConfirmed(long userId, long friendId) {
-//
-            String sqlQuery = "select count(*) from FRIENDSHIP_RELATIONS where FIRST_USER_ID = ? AND SECOND_USER_ID = ?";
-            //noinspection ConstantConditions: return value is always an int, so NPE is impossible here
-            int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, friendId, userId);
-            return result == 1;
+        String sqlQuery = "SELECT count(*) FROM friendship_relations WHERE first_user_id = ? AND second_user_id = ?";
+        int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, friendId, userId);
+        return result == 1;
     }
-
 
     @Override
     public User put(User user) {
-        if (!doesUserExist(user.getId())){
+        if (!doesUserExist(user.getId())) {
             throw new NotFoundException("Пользователь с таким ID не найден");
         }
-        String sqlQuery = "update USERS set /*USER_ID = ?,*/ USER_LOGIN = ?, USER_NAME = ?, USER_EMAIL = ?, USER_BIRTHDAY = ? WHERE USER_ID = ?";
+        if (user.getFriendsId() == null) user.setFriendsId(new HashSet<>());
+        String sqlQuery = "UPDATE users SET user_login = ?, user_name = ?, user_email = ?, user_birthday = ? WHERE user_id = ?";
         jdbcTemplate.update(sqlQuery,
-              /*  user.getId(),*/
                 user.getLogin(),
                 user.getName(),
                 user.getEmail(),
@@ -121,34 +109,33 @@ public class UserDbStorage implements UserStorage{
         return user;
     }
 
-    private void userFriendshipRelationsUpdate(User user) { // updates friendship relation statuses between user and friends
-        if(user.getFriendsId() != null) {
-        String sqlQuery = "delete from FRIENDSHIP_RELATIONS where FIRST_USER_ID = ?";
-        jdbcTemplate.update(sqlQuery, user.getId());//  clearing previous records
+    public void userFriendshipRelationsUpdate(User user) {
+        if (user.getFriendsId() != null) {
+            String sqlQuery = "DELETE FROM friendship_relations WHERE first_user_id = ?";
+            jdbcTemplate.update(sqlQuery, user.getId());//  clearing previous records
 
-        for (Long friendId : user.getFriendsId()) { // insert new friends
-            String sqlQueryI = "insert into FRIENDSHIP_RELATIONS (FIRST_USER_ID, SECOND_USER_ID, FRIENDSHIP_STATUS_ID) " +
-                    "values (?, ?, ?)";
-            if (isFriendshipConfirmed(user.getId(), friendId)) { // updating friendships statuses from the user's side
-                jdbcTemplate.update(sqlQueryI, user.getId(), friendId, 1);
+            for (Long friendId : user.getFriendsId()) {
+                String sqlQueryI = "INSERT INTO friendship_relations (first_user_id, second_user_id, friendship_status_id) " +
+                        "VALUES (?, ?, ?)";
+                if (isFriendshipConfirmed(user.getId(), friendId)) { // updating friendships statuses from the user's side
+                    jdbcTemplate.update(sqlQueryI, user.getId(), friendId, 1);
+                } else {
+                    jdbcTemplate.update(sqlQueryI, user.getId(), friendId, 2);
+                }
             }
-            else {
-                jdbcTemplate.update(sqlQueryI, user.getId(), friendId, 2);
-            }
-        }
-            String sql = "SELECT FIRST_USER_ID FROM FRIENDSHIP_RELATIONS WHERE SECOND_USER_ID = ?"; // те кто добавил юзера в друзья сами
+            String sql = "SELECT first_user_id FROM friendship_relations WHERE second_user_id = ?"; // те кто добавил юзера в друзья сами
             List<Long> friendsAddedByUser = jdbcTemplate.query(sql, (rs, rowNum)
-                    -> (rs.getLong("FIRST_USER_ID")), user.getId());
+                    -> (rs.getLong("first_user_id")), user.getId());
 
-            List<Long> confirmedFriendsAddedByUser= friendsAddedByUser.stream().
+            List<Long> confirmedFriendsAddedByUser = friendsAddedByUser.stream().
                     filter(x -> user.getFriendsId()
-                           .contains(x)).collect(Collectors.toList());
-            List<Long> notConfirmedFriendsAddedByUser= friendsAddedByUser.stream().
+                            .contains(x)).collect(Collectors.toList());
+            List<Long> notConfirmedFriendsAddedByUser = friendsAddedByUser.stream().
                     filter(x -> !(user.getFriendsId()
                             .contains(x))).collect(Collectors.toList());
-        String sqlQueryI = "update FRIENDSHIP_RELATIONS set FRIENDSHIP_STATUS_ID = ? WHERE FIRST_USER_ID = ? AND SECOND_USER_ID = ?";
-        confirmedFriendsAddedByUser.forEach(x -> jdbcTemplate.update(sqlQueryI, 1, x, user.getId()));
-        notConfirmedFriendsAddedByUser.forEach(x -> jdbcTemplate.update(sqlQueryI, 2, x, user.getId()));
+            String sqlQueryI = "update FRIENDSHIP_RELATIONS set FRIENDSHIP_STATUS_ID = ? WHERE FIRST_USER_ID = ? AND SECOND_USER_ID = ?";
+            confirmedFriendsAddedByUser.forEach(x -> jdbcTemplate.update(sqlQueryI, 1, x, user.getId()));
+            notConfirmedFriendsAddedByUser.forEach(x -> jdbcTemplate.update(sqlQueryI, 2, x, user.getId()));
         }
     }
 
@@ -160,9 +147,8 @@ public class UserDbStorage implements UserStorage{
         return usersMap;
     }
 
-
     public boolean doesUserExist(long id) {
-        String sqlQuery = "select count(*) from USErS where USER_ID = ?";
+        String sqlQuery = "SELECT count(*) FROM users WHERE user_id = ?";
         long result = jdbcTemplate.queryForObject(sqlQuery, Long.class, id);
         return result == 1;
     }

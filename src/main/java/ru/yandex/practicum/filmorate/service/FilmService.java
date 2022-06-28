@@ -1,30 +1,31 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.IncorrectLikeException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmGenre;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
 
-    FilmStorage filmStorage;
+    private JdbcTemplate jdbcTemplate;
+    private FilmStorage filmStorage;
+    private UserStorage userStorage;
 
-    UserStorage userStorage;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(JdbcTemplate jdbcTemplate, FilmStorage filmStorage, UserStorage userStorage) {
+        this.jdbcTemplate = jdbcTemplate;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -33,7 +34,8 @@ public class FilmService {
         Set<Long> userLikes = getFilmById(filmId).getUserLikes();
         if (userLikes.contains(userId)) throw new IncorrectLikeException("Вы уже поставили лайк!");
         else {
-            userLikes.add(userId);
+            String sqlQuery = "INSERT INTO user_likes (user_id, film_id) VALUES (?, ?)";
+            jdbcTemplate.update(sqlQuery, userId, filmId);
         }
     }
 
@@ -44,7 +46,8 @@ public class FilmService {
         if (!userLikes.contains(userId)) throw new NotFoundException("Лайк у фильма отсутствует - его нельзя убрать!");
         if (!filmStorage.getFilms().containsKey(filmId)) throw new NotFoundException("Фильм с таким Id отсутствует");
         else {
-            userLikes.remove(userId);
+            String sqlQuery = "DELETE FROM user_likes WHERE USER_ID = ? AND FILM_ID = ?";
+            jdbcTemplate.update(sqlQuery, userId, filmId);
         }
     }
 
@@ -60,7 +63,8 @@ public class FilmService {
         return (p0.getUserLikes().size() - p1.getUserLikes().size()) * -1;
     }
 
-    private Film getFilmById(long filmId) {
+    private Film getFilmById(long filmId) { // OK
+
         return filmStorage.getFilms().get(filmId);
     }
 
@@ -77,7 +81,7 @@ public class FilmService {
         if (film.getReleaseDate().isBefore(EARLIEST_DATE)) {
             throw new ValidationException("Дата не может быть раньше чем 28 декабря 1895 года.");
         }
-        if (film.getDuration()/*.toNanos()*/ <= 0) {
+        if (film.getDuration() <= 0) {
             throw new ValidationException("У фильма должна быть положительная продолжительность.");
         }
     }

@@ -1,54 +1,32 @@
---
--- INSERT INTO USERS (user_login, user_name, user_email, user_birthday) VALUES ('Tom', 'Soyer', 'post@post.ru', '1946-08-20');
+DELETE FROM film_genre_matches;
+DELETE FROM friendship_relations;
+DELETE FROM friendship_status;
+DELETE FROM genres;
+DELETE FROM user_likes;
+DELETE FROM films;
+DELETE FROM mpa_rating;
+DELETE FROM users;
 
-INSERT INTO MPA_rating (MPA_NAME)
+INSERT INTO mpa_rating (mpa_id, mpa_name)
 VALUES
-    ('G'),
-    ('PG'),
-    ('PG_13'),
-    ('R'),
-    ('NC_17');
+    (1, 'G'),
+    (2, 'PG'),
+    (3, 'PG-13'),
+    (4, 'R'),
+    (5, 'NC-17');
 
-
--- INSERT INTO MPA_rating (MPA_NAME)
--- SELECT
---     ('G'),
---     ('PG'),
---     ('PG_13'),
---     ('R'),
---     ('NC_17')
--- WHERE ;
-
-
-INSERT INTO GENRES (GENRE_NAME)
+INSERT INTO genres (genre_id, genre_name)
 VALUES
-    ('Комедия'),
-    ('Драма'),
-    ('Мультфильм'),
-    ('Триллер'),
-    ('Документальный'),
-    ('Боевик');
+    (1, 'Комедия'),
+    (2, 'Драма'),
+    (3, 'Мультфильм'),
+    (4, 'Триллер'),
+    (5, 'Документальный'),
+    (6, 'Боевик');
 
-INSERT INTO FRIENDSHIP_STATUS (FRIENDSHIP_STATUS)
+INSERT INTO friendship_status (friendship_status_id, friendship_status)
 VALUES
-    ('confirmed'),
-    ('not confirmed');
-
-INSERT INTO USERS (USER_ID, USER_LOGIN,
-                   USER_NAME,
-                   USER_EMAIL,
-                   USER_BIRTHDAY)
-VALUES (1, 'Rex', 'Tom', 'tom@soyer@travel.com', '1946-08-20'),
-       (2, 'Rex2', 'Tom', 'tom@soyer@travel.com', '1946-08-20'),
-       (3, 'Rex3', 'Tom', 'tom@soyer@travel.com', '1946-08-20'),
-       (4, 'Rex4', 'Tom', 'tom@soyer@travel.com', '1946-08-20');
-
-
-INSERT INTO FRIENDSHIP_RELATIONS (FIRST_USER_ID, SECOND_USER_ID, FRIENDSHIP_STATUS_ID)
-VALUES (1, 2, 1),
-       (2, 1, 1),
-       (1, 3, 1),
-       (1, 4, 1);
-
+    (1, 'confirmed'),
+    (2, 'not confirmed');
 
 
