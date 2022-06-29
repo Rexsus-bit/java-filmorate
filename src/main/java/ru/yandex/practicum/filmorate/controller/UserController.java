@@ -13,22 +13,20 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    private UserStorage userStorage;
     private UserService userService;
 
-    public UserController(UserStorage userStorage, UserService userService) {
-        this.userStorage = userStorage;
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping
     public List<User> findAll() {
-        return userStorage.findAll();
+        return userService.findAll();
     }
 
     @GetMapping("/{userId}")
     public User getUser(@PathVariable int userId) {
-        return userStorage.getUser(userId);
+        return userService.getUser(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -54,13 +52,13 @@ public class UserController {
     @PostMapping
     public User create(@RequestBody User user) {
         userService.validateUser(user);
-        return userStorage.create(user);
+        return userService.create(user);
     }
 
     @PutMapping
     public User put(@RequestBody User user) {
         userService.validateUser(user);
-        return userStorage.put(user);
+        return userService.put(user);
     }
 
 
