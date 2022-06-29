@@ -98,5 +98,19 @@ public class UserService {
         }
     }
 
+    public List<User> findAll() {
+        return userStorage.findAll();
+    }
 
+    public User getUser(int userId) {
+        return userStorage.getUser(userId);
+    }
+
+    public User create(User user) {
+        return userStorage.create(user);
+    }
+
+    public User put(User user) {
+        return userStorage.put(user);
+    }
 }

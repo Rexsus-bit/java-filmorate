@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.Data;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Primary
 @Component
@@ -22,6 +24,10 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private static long id = 1;
+
+    public static void setId(long id) {
+        FilmDbStorage.id = id;
+    }
 
     private long filmIdCounter() {
         return id++;
@@ -83,7 +89,6 @@ public class FilmDbStorage implements FilmStorage {
                 .name(FilmGenreTypes.valueOf(resultSet.getString("genre_name")))
                 .build();
     }
-
 
     @Override
     public Film create(Film film) {
@@ -153,7 +158,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    public boolean doesFilmExist(long filmId) {
+    private boolean doesFilmExist(long filmId) {
         String sqlQuery = "SELECT count(*) FROM films WHERE film_id = ?";
         long result = jdbcTemplate.queryForObject(sqlQuery, Long.class, filmId);
         return result == 1;
@@ -162,15 +167,13 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Map<Long, Film> getFilms() {
         List<Film> films = findAll();
-        Map<Long, Film> filmsMap = new HashMap<>();
-        films.stream().forEach(x -> filmsMap.put(x.getId(), x));
-        return filmsMap;
+        return films.stream().collect(Collectors.toMap(Film::getId, film -> film));
     }
 
+    @Override
     public Film getFilm(long filmId) {
         Map<Long, Film> films = getFilms();
         if (!films.containsKey(filmId)) throw new NotFoundException("Фильм с таким ID не найден");
         return films.get(filmId);
     }
-
 }

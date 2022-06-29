@@ -14,7 +14,7 @@ public class User {
     private String name;
     private String email;
     private LocalDate birthday;
-    private Set<Long> friendsId; // TODO добавлять ли статус?
+    private Set<Long> friendsId;
 
     public User(long id, String login, String name, String email, LocalDate birthday, Set<Long> friendsId) {
         this.id = id;

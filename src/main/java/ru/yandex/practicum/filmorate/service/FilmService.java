@@ -85,4 +85,20 @@ public class FilmService {
             throw new ValidationException("У фильма должна быть положительная продолжительность.");
         }
     }
+
+    public List<Film> findAll() {
+        return filmStorage.findAll();
+    }
+
+    public Film getFilm(long filmId) {
+        return filmStorage.getFilm(filmId);
+    }
+
+    public Film create(Film film) {
+        return filmStorage.create(film);
+    }
+
+    public Film put(Film film) {
+        return filmStorage.put(film);
+    }
 }

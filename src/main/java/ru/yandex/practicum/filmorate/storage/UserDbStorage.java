@@ -27,7 +27,11 @@ public class UserDbStorage implements UserStorage {
 
     private static long id = 1;
 
-    long userIdCounter() {
+    public static void setId(long id) {
+        UserDbStorage.id = id;
+    }
+
+    private long userIdCounter() {
         return id++;
     }
 
@@ -126,7 +130,6 @@ public class UserDbStorage implements UserStorage {
             String sql = "SELECT first_user_id FROM friendship_relations WHERE second_user_id = ?"; // те кто добавил юзера в друзья сами
             List<Long> friendsAddedByUser = jdbcTemplate.query(sql, (rs, rowNum)
                     -> (rs.getLong("first_user_id")), user.getId());
-
             List<Long> confirmedFriendsAddedByUser = friendsAddedByUser.stream().
                     filter(x -> user.getFriendsId()
                             .contains(x)).collect(Collectors.toList());
@@ -152,5 +155,6 @@ public class UserDbStorage implements UserStorage {
         long result = jdbcTemplate.queryForObject(sqlQuery, Long.class, id);
         return result == 1;
     }
+
 
 }
