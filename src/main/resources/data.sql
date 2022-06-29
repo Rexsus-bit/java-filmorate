@@ -1,11 +1,11 @@
--- DELETE FROM film_genre_matches;
--- DELETE FROM friendship_relations;
--- DELETE FROM friendship_status;
--- DELETE FROM genres;
--- DELETE FROM user_likes;
--- DELETE FROM films;
--- DELETE FROM mpa_rating;
--- DELETE FROM users;
+DELETE FROM film_genre_matches;
+DELETE FROM friendship_relations;
+DELETE FROM friendship_status;
+DELETE FROM genres;
+DELETE FROM user_likes;
+DELETE FROM films;
+DELETE FROM mpa_rating;
+DELETE FROM users;
 
 INSERT INTO mpa_rating (mpa_id, mpa_name)
 VALUES
