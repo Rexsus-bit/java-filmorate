@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.UserFriendListException;
@@ -16,15 +18,16 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
+    private UserStorage userStorage;
+    private JdbcTemplate jdbcTemplate;
 
-    UserStorage userStorage;
-
-    @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(UserStorage userStorage, JdbcTemplate jdbcTemplate) {
         this.userStorage = userStorage;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public void addToFriendList(long userId, long friendId) {
+        int friendshipStatus = 2;
         Map<Long, User> users = userStorage.getUsers();
         User user = users.get(userId);
         User userFriend = users.get(friendId);
@@ -34,8 +37,13 @@ public class UserService {
         } else if (!userStorage.getUsers().containsKey(userId) || !userStorage.getUsers().containsKey(friendId)) {
             throw new NotFoundException("Пользователя с таким ID нет!");
         } else {
-            user.getFriendsId().add(userFriend.getId());
-            userFriend.getFriendsId().add(user.getId());
+            if (userFriend.getFriendsId().contains(userId)) {
+                friendshipStatus = 1;
+                String sqlQuery = "UPDATE friendship_relations SET friendship_status_id = ? WHERE first_user_id = ? AND second_user_id = ?";
+                jdbcTemplate.update(sqlQuery, friendshipStatus, userFriend.getId(), user.getId());
+            }
+            String sqlQuery = "INSERT INTO friendship_relations(first_user_id, second_user_id, friendship_status_id) VALUES (?, ?, ?)";
+            jdbcTemplate.update(sqlQuery, user.getId(), userFriend.getId(), friendshipStatus);
         }
     }
 
@@ -47,8 +55,8 @@ public class UserService {
         if (!user.getFriendsId().contains(userFriend.getId()) && !userFriend.getFriendsId().contains(user.getId())) {
             throw new UserFriendListException("Пользователя нельзя удалить из списка друзей, т.к. он не является другом");
         } else {
-            user.getFriendsId().remove(userFriend.getId());
-            userFriend.getFriendsId().remove(user.getId());
+            String sqlQuery = "DELETE FROM friendship_relations WHERE first_user_id = ? AND second_user_id = ?";
+            jdbcTemplate.update(sqlQuery, userId, friendId);
         }
     }
 
@@ -90,5 +98,19 @@ public class UserService {
         }
     }
 
+    public List<User> findAll() {
+        return userStorage.findAll();
+    }
 
+    public User getUser(int userId) {
+        return userStorage.getUser(userId);
+    }
+
+    public User create(User user) {
+        return userStorage.create(user);
+    }
+
+    public User put(User user) {
+        return userStorage.put(user);
+    }
 }

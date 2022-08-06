@@ -15,4 +15,32 @@ public class User {
     private String email;
     private LocalDate birthday;
     private Set<Long> friendsId;
+
+    public User(long id, String login, String name, String email, LocalDate birthday, Set<Long> friendsId) {
+        this.id = id;
+        this.login = login;
+        this.name = name;
+        this.email = email;
+        this.birthday = birthday;
+        this.friendsId = friendsId;
+    }
+
+    public User(long id, String login, String name, String email, LocalDate birthday) {
+        this.id = id;
+        this.login = login;
+        this.name = name;
+        this.email = email;
+        this.birthday = birthday;
+    }
+
+    public User(String login, String name, String email) {
+        this.login = login;
+        this.name = name;
+        this.email = email;
+    }
+
+    public User() {
+    }
 }
+
+
